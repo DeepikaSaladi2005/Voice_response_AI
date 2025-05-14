@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Bot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-box" id="chat-box">
+            <div class="bot-message">Hello! How can I help you?</div>
+        </div>
+        <div class="input-area">
+            <input type="text" id="user-input" placeholder="Type a message...">
+            <button id="send-btn">
+                <img src="{{ url_for('static', filename='bot1.jpg') }}" alt="Send">
+            </button>
+        </div>        
+    </div>
+    <script>
+        document.getElementById("send-btn").addEventListener("click", async function() {
+    const userInput = document.getElementById("user-input").value;
+    if (!userInput.trim()) return;
+    
+    const chatBox = document.getElementById("chat-box");
+    const userMessage = document.createElement("div");
+    userMessage.classList.add("user-message");
+    userMessage.textContent = userInput;
+    chatBox.appendChild(userMessage);
+    document.getElementById("user-input").value = "";
+    
+    const response = await fetch("/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: userInput })
+    });
+    
+    const data = await response.json();
+    const botMessage = document.createElement("div");
+    botMessage.classList.add("bot-message");
+    botMessage.textContent = data.reply;
+    chatBox.appendChild(botMessage);
+
+    // Play the latest generated audio file
+    if (data.audio) {
+        const audio = new Audio(data.audio);
+        audio.play();
+    }
+});
+
+    </script>
+</body>
+</html>
